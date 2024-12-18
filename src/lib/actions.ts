@@ -1,6 +1,5 @@
 'use server';
 
-import {signIn} from "@/lib/auth";
 import bcrypt from "bcrypt";
 import {sql} from "@vercel/postgres";
 import {z} from "zod";
