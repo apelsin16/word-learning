@@ -4,8 +4,11 @@ import React from 'react';
 
 interface ButtonProps {
     text: string;
+    type?: 'button' | 'submit';
     variant?: 'primary' | 'secondary'; // Додаткові варіанти стилів
     disabled?: boolean;
+    className?: string;
+    onClick?: () => void;
 }
 
 const Button: React.FC<ButtonProps> = ({ text, variant = 'primary', disabled = false, ...rest}) => {

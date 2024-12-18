@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header";
+import SessionProviderWrapper from "@/components/session-provider-wrapper";
+import dynamic from "next/dynamic";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -12,6 +13,8 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+const Header = dynamic(() => import('@/components/header'));
 
 export const metadata: Metadata = {
     title: "WordWise — Вивчайте іноземні слова легко",
@@ -26,14 +29,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-    <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-    >
-    <Header />
-    <main className="px-4 py-6 sm:px-6 lg:px-8">
-        {children}
-    </main>
-    </body>
+      <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <SessionProviderWrapper>
+          <Header />
+        </SessionProviderWrapper>
+        <main className="px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+        </main>
+      </body>
     </html>
   );
 }
