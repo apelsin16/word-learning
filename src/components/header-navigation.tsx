@@ -6,6 +6,7 @@ import {usePathname} from "next/navigation";
 const links = [
     { href: '/', label: 'Home' },
     { href: '/topics', label: 'Topics' },
+    { href: '/words', label: 'Words' },
 ];
 
 function HeaderNavigation() {

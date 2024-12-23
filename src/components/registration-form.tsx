@@ -3,8 +3,11 @@
 import React, {useState} from 'react';
 import {registerUser} from "@/lib/actions";
 import Button from "@/components/button";
+import {useRouter} from "next/navigation";
 
 function RegistrationForm() {
+
+    const router = useRouter();
 
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [error, setError] = useState<string | null>(null)
@@ -34,7 +37,10 @@ function RegistrationForm() {
 
             await registerUser(email, password, name, confirmPassword);
             form.reset();
+
+            router.push("/topics");
             console.log('Користувача успішно зареєстровано!');
+
         } catch (err) {
             if (err instanceof Error) {
                 setError(err.message);

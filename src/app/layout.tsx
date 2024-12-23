@@ -33,10 +33,10 @@ export default function RootLayout({
           className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SessionProviderWrapper>
-          <Header />
+            <Header />
         </SessionProviderWrapper>
         <main className="px-4 py-6 sm:px-6 lg:px-8">
-            {children}
+                {children}
         </main>
       </body>
     </html>

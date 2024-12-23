@@ -1,9 +1,8 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcrypt";
-import { sql } from "@vercel/postgres";
-import {User} from "@/lib/definitions";
+import bcrypt from "bcryptjs";
 import {z} from "zod";
+import {getUserByEmail} from "@/lib/actions";
 
 export const authConfig: NextAuthOptions = {
     session: {
@@ -25,6 +24,7 @@ export const authConfig: NextAuthOptions = {
                 const parsed = schema.safeParse(credentials);
 
                 if (!parsed.success) {
+                    console.error("Validation failed:", parsed.error);
                     throw new Error("Invalid credentials");
                 }
 
@@ -35,9 +35,7 @@ export const authConfig: NextAuthOptions = {
                 }
 
                 // Знайти користувача в базі
-                const user = await sql<User>`
-                      SELECT * FROM users WHERE email = ${email};
-                    `;
+                const user = await getUserByEmail(email);
 
                 if (!user.rows.length) {
                     throw new Error("Користувача не знайдено");

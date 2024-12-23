@@ -3,6 +3,14 @@
 import bcrypt from "bcrypt";
 import {sql} from "@vercel/postgres";
 import {z} from "zod";
+import {Topic, User, Word} from "@/lib/definitions";
+
+export const getUserByEmail = async (email: string) => {
+    const user = await sql<User>`
+      SELECT id, name, email, password FROM users WHERE email = ${email};
+    `;
+    return user;
+}
 
 // Схема валідації
 const userRegistrationSchema = z.object({
@@ -27,18 +35,6 @@ export const registerUser = async (
     const hashedPassword = await bcrypt.hash(password, 10);
 
     try {
-        // Переконайся, що таблиця вже створена
-        await sql`CREATE EXTENSION IF NOT EXISTS "pgcrypto";`;
-        await sql`
-            CREATE TABLE IF NOT EXISTS users (
-                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                email VARCHAR(255) NOT NULL UNIQUE,
-                name VARCHAR(255) NOT NULL,
-                password VARCHAR(255) NOT NULL,
-                created_at TIMESTAMP DEFAULT now()
-            );
-        `;
-
         // Додаємо користувача
         await sql`
             INSERT INTO users (id, email, name, password)
@@ -53,3 +49,102 @@ export const registerUser = async (
         throw new Error('Failed to register user.');
     }
 }
+
+const topicSchema = z.object({
+    topicName: z.string().min(1, 'Назва теми не може бути порожньою'),
+    topicColor: z.string(),
+    userId: z.string().min(1),
+})
+
+export const createTopic = async (
+    topicName: string,
+    topicColor: string,
+    userId: string
+):Promise<void> => {
+    console.log("createTopic", topicName, topicColor, userId);
+    topicSchema.parse({topicName, topicColor, userId});
+
+    try {
+        const result = await sql`
+            INSERT INTO topics (name, color, created_by)
+            VALUES (${topicName}, ${topicColor}, ${userId})
+            RETURNING id;
+        `;
+
+        const topicId = result.rows[0]?.id;
+
+        if (!topicId) {
+            throw new Error('Failed to create topic: ID not returned');
+        }
+
+        await sql`
+            INSERT INTO user_topics (user_id, topic_id)
+            VALUES (${userId}, ${topicId});
+        `
+    } catch (err) {
+        console.log(err)
+    }
+}
+
+export const getUserTopics = async (userId: string): Promise<Topic[]> => {
+    try {
+        const result = await sql<Topic[]>`
+            SELECT t.id, t.name, t.color, t.created_at 
+            FROM topics t
+            JOIN user_topics ut ON t.id = ut.topic_id
+            WHERE ut.user_id = ${userId}
+            ORDER BY t.created_at DESC
+        `;
+        const topics = result.rows.flat();
+        return topics
+    } catch (error) {
+        console.error("Помилка отримання тем:", error);
+        throw new Error("Не вдалося отримати теми.");
+    }
+}
+
+export const getUserWords = async (userId: string): Promise<Word[]> => {
+    try {
+        const result = await sql<Word[]>`
+            SELECT wc.*
+            FROM word_cards wc
+            LEFT JOIN topic_words tw ON wc.id = tw.word_card_id
+            WHERE tw.word_card_id IS NULL AND wc.user_id = ${userId};
+
+        `;
+        const words = result.rows.flat();
+        return words;
+    } catch (error) {
+        console.error("Помилка отримання слів:", error);
+        throw new Error("Не вдалося отримати слова.");
+    }
+}
+
+const wordSchema = z.object({
+    word: z.string().min(1, 'Поле "Слово" не може бути порожнім'),
+    translation: z.string().min(1, 'Поле "Переклад" не може бути порожнім'),
+    example: z.string(),
+    userId: z.string().min(1),
+})
+
+export const createWordCard = async (
+    word: string,
+    translation: string,
+    example: string,
+    userId: string
+):Promise<void> => {
+    wordSchema.parse({word, translation, example, userId});
+
+    try {
+        await sql`
+            INSERT INTO word_cards (word, translation, example, user_id)
+            VALUES (${word}, ${translation}, ${example}, ${userId})
+        `;
+    } catch (error) {
+        console.error("Помилка додавання слова:", error);
+        throw new Error("Не вдалося додати слово.");
+    }
+}
+
+
+
