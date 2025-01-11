@@ -17,7 +17,7 @@ function Page({params}: PageProps):  JSX.Element {
     const searchParams = useSearchParams();
     const id = searchParams.get("id") as string;
     const name = searchParams.get("name");
-    const color = searchParams.get("color");
+    const color = searchParams.get("color") as string;
 
     return (
         <div>
