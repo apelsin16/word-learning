@@ -1,15 +1,19 @@
 'use client';
 
 import React from 'react';
-import {createWordCard} from "@/lib/actions";
+import {createTopicWord, createWordCard} from "@/lib/actions";
 import {useRouter} from "next/navigation";
 import Button from "@/components/button";
 
 interface ICreateWordFormProps {
-    userId: string
+    userId: string;
+    topicId?: string;
+    slug?: string;
+    topicName?: string;
+    topicColor?: string;
 }
 
-function CreateWordForm({userId}: ICreateWordFormProps) {
+function CreateWordForm({userId, topicId, slug, topicName, topicColor}: ICreateWordFormProps) {
     const router = useRouter();
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -23,10 +27,20 @@ function CreateWordForm({userId}: ICreateWordFormProps) {
             const translation = formData.get("translation") as string;
             const example = formData.get("example") as string;
 
-            await createWordCard(word, translation, example, userId);
+            const wordCardId = await createWordCard(word, translation, example, userId);
+
+            if(topicId) {
+                await createTopicWord(topicId, wordCardId)
+            }
 
             form.reset();
-            router.push("/words");
+            if(topicId) {
+                router.push(
+                    `/topics/${slug}?id=${topicId}&name=${topicName}&color=${encodeURIComponent(topicColor)}`
+                );
+            } else {
+                router.push("/words");
+            }
         } catch (error) {
             console.log(error, "Не вдалося створити слово")
         }

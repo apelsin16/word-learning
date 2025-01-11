@@ -6,7 +6,7 @@ export type User = {
 };
 
 export type Topic = {
-    id: number;
+    id: string;
     name: string;
     color: string;
 }

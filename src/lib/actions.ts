@@ -132,19 +132,70 @@ export const createWordCard = async (
     translation: string,
     example: string,
     userId: string
-):Promise<void> => {
+):Promise<string> => {
     wordSchema.parse({word, translation, example, userId});
 
     try {
-        await sql`
+        const result = await sql`
             INSERT INTO word_cards (word, translation, example, user_id)
             VALUES (${word}, ${translation}, ${example}, ${userId})
+            RETURNING id;
         `;
+        return result.rows[0].id
     } catch (error) {
         console.error("Помилка додавання слова:", error);
         throw new Error("Не вдалося додати слово.");
     }
 }
+
+export const getTopicWords = async (topicId: string): Promise<Word[]> => {
+    try {
+        const result = await sql`
+            SELECT tw.id,
+                tw.created_at AS user_id,
+                t.name AS topic_name,
+                wc.word AS word,
+                wc.translation AS translation,
+                wc.example AS example
+            FROM topic_words tw
+            JOIN topics t ON tw.topic_id = t.id
+            JOIN word_cards wc ON tw.word_card_id = wc.id
+            WHERE tw.topic_id = ${topicId};
+        `;
+
+        // Приведення до типу Word[]
+        const words: Word[] = result.rows.map(row => ({
+            id: row.id,
+            name: row.topic_name,
+            word: row.word,
+            translation: row.translation,
+            example: row.example,
+            user_id: row.created_at,
+        }));
+        return words;
+    } catch (error) {
+        console.error("Помилка отримання слів:", error);
+        throw new Error("Не вдалося отримати слова.");
+    }
+}
+
+export const createTopicWord = async (topicId: string, wordCardId: string): Promise<boolean> => {
+    try {
+            const result = await sql`
+                INSERT INTO topic_words (topic_id, word_card_id)
+                VALUES (${topicId}, ${wordCardId})
+                ON CONFLICT (topic_id, word_card_id) DO NOTHING
+                RETURNING id;
+            `;
+
+            return result.rows.length > 0;
+    } catch (error) {
+        console.error("Помилка додавання слова до топіку:", error);
+        throw new Error("Не вдалося додати слово до топіку.");
+    }
+}
+
+
 
 
 

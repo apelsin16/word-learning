@@ -12,7 +12,7 @@ const links = [
 function HeaderNavigation() {
     const pathname = usePathname();
     return (
-        <nav>
+        <nav className="flex size-full sm:size-auto justify-center">
             <ul className="flex items-center justify-between gap-10">
                 {links.map((link) => (
                     <li key={link.href}>

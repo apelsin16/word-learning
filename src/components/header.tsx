@@ -9,22 +9,23 @@ import {usePathname} from "next/navigation";
 import {signOut} from "next-auth/react";
 import {useSession} from "next-auth/react";
 import HeaderNavigation from "@/components/header-navigation";
+import {FaUserGraduate} from "react-icons/fa";
 
 function Header() {
     const pathname = usePathname();
     const {data: session} = useSession();
     return (
-        <header className="flex items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-center gap-2 text-[70px] font-bold text-[#adbec1]">
+        <header className="flex items-center justify-between flex-wrap px-4 py-6 sm:px-6 lg:px-8  gap-y-4 relative">
+            <Link href='/' className="flex items-center justify-center gap-2 text-[35px] sm:text-[70px] font-bold text-[#adbec1]">
                 <Image
                     src="/logo.png"
                     alt="main logo"
-                    width={75}
-                    height={75}
-                    className="rounded-xl"
+                    className="rounded-xl w-16 md:w-20 lg:w-28"
+                    width={100}
+                    height={100}
                 />
                 WordWise
-            </div>
+            </Link>
             {session && <HeaderNavigation />}
             <div className="flex gap-2">
                 {!session && pathname !== "/auth/login" &&
@@ -45,15 +46,21 @@ function Header() {
                     <Link
                         href="/profile"
                         className={clsx(
-                            "inline-flex px-6 py-2",
+                            "absolute top-1 right-1/4 t-1 px-6 py-2",
                             { "font-bold cursor-not-allowed": pathname === "/profile"  }
                         )}>
-                        {session.user.name}
+                        <span className="sm:hidden text-[#6B7280]">
+                            <FaUserGraduate />
+                        </span>
+                        <span className='hidden sm:inline-flex'>
+                            {session.user.name}
+                        </span>
                     </Link>}
                 {session &&
                     <Button
                         text="Вийти"
                         variant="secondary"
+                        className="absolute top-1 right-1 sm:static"
                         onClick={() => signOut({callbackUrl: '/auth/login'})}
                     />}
             </div>

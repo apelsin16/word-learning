@@ -11,7 +11,7 @@ interface ButtonProps {
     onClick?: () => void;
 }
 
-const Button: React.FC<ButtonProps> = ({ text, variant = 'primary', disabled = false, ...rest}) => {
+const Button: React.FC<ButtonProps> = ({ text, variant = 'primary', disabled = false, className, ...rest}) => {
     return (
         <button
             {...rest}
@@ -20,7 +20,7 @@ const Button: React.FC<ButtonProps> = ({ text, variant = 'primary', disabled = f
                 variant === 'primary'
                     ? 'bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400'
                     : 'bg-gray-500 hover:bg-gray-600 disabled:bg-gray-300'
-            } ${disabled && 'cursor-not-allowed'}`}
+            } ${disabled && 'cursor-not-allowed'} ${className}`}
         >
             {text}
         </button>
