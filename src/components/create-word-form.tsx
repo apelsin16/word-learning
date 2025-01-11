@@ -34,7 +34,7 @@ function CreateWordForm({userId, topicId, slug, topicName, topicColor}: ICreateW
             }
 
             form.reset();
-            if(topicId) {
+            if(topicId && topicColor) {
                 router.push(
                     `/topics/${slug}?id=${topicId}&name=${topicName}&color=${encodeURIComponent(topicColor)}`
                 );

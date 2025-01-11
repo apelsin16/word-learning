@@ -110,7 +110,6 @@ export const getUserWords = async (userId: string): Promise<Word[]> => {
             FROM word_cards wc
             LEFT JOIN topic_words tw ON wc.id = tw.word_card_id
             WHERE tw.word_card_id IS NULL AND wc.user_id = ${userId};
-
         `;
         const words = result.rows.flat();
         return words;
